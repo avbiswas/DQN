@@ -38,15 +38,14 @@ class CNNPolicy:
 
             if not self.dueling:
                 output = tf.layers.Dense(512, activation=tf.nn.relu)(latent)
-                self.output = tf.layers.Dense(self.output_dims)(input)
+                self.output = tf.layers.Dense(self.output_dims)(output)
             else:
                 value = tf.layers.Dense(512, activation=tf.nn.relu)(latent)
-                self.state_value = tf.layers.Dense(1, activation=tf.nn.relu)(value)
+                self.state_value = tf.layers.Dense(1)(value)
                 advantage = tf.layers.Dense(256, activation=tf.nn.relu)(latent)
-                self.advantage = tf.layers.Dense(self.output_dims, activation=tf.nn.relu)(advantage)
+                self.advantage = tf.layers.Dense(self.output_dims)(advantage)
                 self.advantage_ = self.advantage - tf.reduce_mean(self.advantage, axis=-1, keepdims=True)
                 self.output = self.state_value + self.advantage_
-
 
             self.action_one_hot = tf.one_hot(self.action_placeholder, self.output_dims)
             self.q_val_action = tf.reduce_sum(self.output * self.action_one_hot, 1)
@@ -128,10 +127,11 @@ class FeedForwardPolicy:
                 self.output = tf.layers.Dense(self.output_dims)(input)
             else:
                 value = tf.layers.Dense(256, activation=tf.nn.relu)(input)
-                self.state_value = tf.layers.Dense(1, activation=tf.nn.relu)(value)
+                self.state_value = tf.layers.Dense(1)(value)
                 advantage = tf.layers.Dense(256, activation=tf.nn.relu)(input)
-                self.advantage = tf.layers.Dense(self.output_dims, activation=tf.nn.relu)(advantage)
-                self.advantage_ = self.advantage - tf.reduce_mean(self.advantage, axis=-1, keepdims=True)
+                self.advantage = tf.layers.Dense(self.output_dims)(advantage)
+                self.advantage_ = self.advantage - tf.reduce_mean(self.advantage, axis=-1,
+                                                                  keepdims=True)
                 self.output = self.state_value + self.advantage_
 
             self.action_one_hot = tf.one_hot(self.action_placeholder, self.output_dims)
